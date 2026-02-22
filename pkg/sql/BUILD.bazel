@@ -332,6 +332,7 @@ go_library(
         "//pkg/keys",
         "//pkg/keyvisualizer",
         "//pkg/kv",
+        "//pkg/kv/followerreads",
         "//pkg/kv/kvclient",
         "//pkg/kv/kvclient/kvcoord",
         "//pkg/kv/kvclient/kvtenant",
