@@ -445,7 +445,10 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
           gh pr comment ${{ github.event.pull_request.number }} --body-file "$COMMENT_FILE"
 
       - name: Post failure comment
-        if: steps.claude_result.outputs.changes_status == 'FAILED'
+        if: |
+          always() &&
+          (steps.claude_result.outputs.changes_status == 'FAILED' ||
+           (steps.address.conclusion == 'failure' && steps.claude_result.conclusion != 'success'))
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CLAUDE_RESULT: ${{ steps.claude_result.outputs.result }}
