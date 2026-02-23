@@ -19,7 +19,6 @@ go_library(
         "//pkg/ccl/oidcccl",
         "//pkg/ccl/partitionccl",
         "//pkg/ccl/securityccl/fipsccl",
-        "//pkg/ccl/storageccl",
         "//pkg/ccl/utilccl",
         "//pkg/ccl/workloadccl",
         "//pkg/crosscluster/logical",

@@ -22,7 +22,6 @@ import (
 	_ "github.com/cockroachdb/cockroach/pkg/ccl/oidcccl"
 	_ "github.com/cockroachdb/cockroach/pkg/ccl/partitionccl"
 	_ "github.com/cockroachdb/cockroach/pkg/ccl/securityccl/fipsccl"
-	_ "github.com/cockroachdb/cockroach/pkg/ccl/storageccl"
 	"github.com/cockroachdb/cockroach/pkg/ccl/utilccl"
 	_ "github.com/cockroachdb/cockroach/pkg/ccl/workloadccl"
 	_ "github.com/cockroachdb/cockroach/pkg/crosscluster/logical"
