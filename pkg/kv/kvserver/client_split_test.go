@@ -14,6 +14,7 @@ import (
 	"reflect"
 	"sort"
 	"strconv"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -4749,6 +4750,8 @@ func TestSplitWithConcurrentLockAcquisitionOnRHS(t *testing.T) {
 	// request targeted to the new RHS replica.
 	splitPaused := make(chan roachpb.RangeID)
 	splitResume := make(chan struct{})
+	requestFailedOnce := &sync.Once{}
+	requestFailed := make(chan struct{})
 
 	st := cluster.MakeTestingClusterSettings()
 	concurrency.UnreplicatedLockReliabilitySplit.Override(ctx, &st.SV, true)
@@ -4802,11 +4805,15 @@ func TestSplitWithConcurrentLockAcquisitionOnRHS(t *testing.T) {
 			RangeID: rID,
 		}
 		for {
-			_, pErr := kv.SendWrappedWith(ctx, store.TestSender(), header, putArgs(rhsKey, []byte("hello")))
+			req := putArgs(rhsKey, []byte("hello"))
+			t.Logf("sending: %v", req)
+			_, pErr := kv.SendWrappedWith(ctx, store.TestSender(), header, req)
 			if pErr == nil {
 				return nil
 			}
 			if _, ok := pErr.GetDetail().(*kvpb.NotLeaseHolderError); ok {
+				requestFailedOnce.Do(func() { close(requestFailed) })
+				time.Sleep(1 * time.Millisecond)
 				continue
 			}
 			return pErr.GoError()
@@ -4814,7 +4821,7 @@ func TestSplitWithConcurrentLockAcquisitionOnRHS(t *testing.T) {
 	})
 
 	// Let the split proceed.
-	time.Sleep(100 * time.Millisecond)
+	<-requestFailed
 	t.Logf("resuming split")
 	close(splitResume)
 
