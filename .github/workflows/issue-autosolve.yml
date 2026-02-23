@@ -231,11 +231,10 @@ jobs:
             if [ -z "$SESSION_ID" ]; then
               # First attempt - start new session
               echo "Starting new Claude session..."
-              claude --print \
+              echo "$PROMPT" | claude --print \
                 --model claude-opus-4-6 \
                 --output-format json \
                 --allowedTools "Read,Write,Edit,Grep,Glob,Bash(gh issue view:*),Bash(./dev test:*),Bash(./dev testlogic:*),Bash(./dev build:*),Bash(./dev generate:*),Bash(git add:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*)" \
-                --prompt "$PROMPT" \
                 > "$EXECUTION_FILE" 2> "$STDERR_FILE" || CLAUDE_EXIT_CODE=$?
             else
               # Retry - resume existing session
