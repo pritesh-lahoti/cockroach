@@ -482,8 +482,12 @@ func (ib *IndexBackfillPlanner) runDistributedMerge(
 		default:
 		}
 
-		// Reset task tracking for this iteration.
+		// Reset task tracking for this iteration and set progress so that we
+		// persist it.
 		progress.MergeIterationCompletedTasks = nil
+		if err := tracker.SetBackfillProgress(ctx, *progress); err != nil {
+			return err
+		}
 
 		genOutputURIAndRecordPrefix := func(instanceID base.SQLInstanceID) (string, error) {
 			// Use nodelocal for temporary storage of merged SSTs. These SSTs are

@@ -1766,6 +1766,7 @@ func TestDistributedMergeResumePreservesProgress(t *testing.T) {
 
 			// Set checkpoint interval based on test variant.
 			sqlDB.Exec(t, `SET CLUSTER SETTING bulkio.index_backfill.checkpoint_interval = $1`, tc.checkpointInterval)
+			sqlDB.Exec(t, `SET CLUSTER SETTING bulkio.index_backfill.progress_interval = '10ms'`)
 			t.Logf("checkpoint interval set to %s, waitForCheckpoint=%v", tc.checkpointInterval, tc.waitForCheckpoint)
 
 			var jobID int
@@ -1896,6 +1897,25 @@ func TestDistributedMergeResumePreservesProgress(t *testing.T) {
 						"MergeIterationCompletedTasks should be cleared after iteration completion")
 					t.Logf("before pause: phase=%d, tasksTotal=%d, completedTasks=%v",
 						phase, tasksTotal, completedTasks)
+
+					// Verify that the progress fraction shows that we are in the final merge iteration (> 60%)
+					testutils.SucceedsWithin(t, func() error {
+						var fractionCompleted float64
+						if err := db.QueryRow(
+							`SELECT fraction_completed FROM crdb_internal.jobs WHERE job_id = $1`,
+							jobID,
+						).Scan(&fractionCompleted); err != nil {
+							return err
+						}
+						if fractionCompleted < 0.6 {
+							return errors.Errorf(
+								"fraction_completed %.3f < 0.6, waiting for progress flush",
+								fractionCompleted)
+						}
+						t.Logf("fraction_completed after iteration %d: %.3f",
+							tc.pauseAfterIteration, fractionCompleted)
+						return nil
+					}, 5*time.Second)
 				}
 
 				// Pause the job while it's blocked in the hook.
