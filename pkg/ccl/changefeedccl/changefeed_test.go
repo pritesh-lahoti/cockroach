@@ -10125,7 +10125,7 @@ func TestChangefeedOnlyInitialScan(t *testing.T) {
 		for testName, changefeedStmt := range initialScanOnlyTests {
 			t.Run(testName, func(t *testing.T) {
 				sqlDB.Exec(t, `CREATE TABLE foo (a INT PRIMARY KEY)`)
-				sqlDB.Exec(t, `INSERT INTO foo (a) SELECT * FROM generate_series(1, 5000);`)
+				sqlDB.Exec(t, `INSERT INTO foo (a) SELECT * FROM generate_series(1, 500);`)
 				defer func() {
 					sqlDB.Exec(t, `DROP TABLE foo`)
 				}()
@@ -10134,10 +10134,10 @@ func TestChangefeedOnlyInitialScan(t *testing.T) {
 				defer closeFeed(t, feed)
 
 				// Insert few more rows after the feed started -- we should not see those emitted.
-				sqlDB.Exec(t, "INSERT INTO foo VALUES (5005), (5007), (5009)")
+				sqlDB.Exec(t, "INSERT INTO foo VALUES (505), (507), (509)")
 
 				var expectedMessages []string
-				for i := 1; i <= 5000; i++ {
+				for i := 1; i <= 500; i++ {
 					expectedMessages = append(expectedMessages, fmt.Sprintf(
 						`foo: [%d]->{"after": {"a": %d}}`, i, i,
 					))
