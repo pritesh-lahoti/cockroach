@@ -249,15 +249,27 @@ func (e *Engines) SetStoreID(ctx context.Context, id roachpb.StoreID) error {
 // it consists of two batches, one per engine.
 // TODO(sep-raft-log): generalize this so that the LogEngine batch is lazy.
 func (e *Engines) NewWriteBatch() WriteBatch {
-	if !e.Separated() {
-		// TODO(sep-raft-log): wrap for key assertions.
-		b := e.Engine().NewWriteBatch()
+	if e.Separated() {
+		return WriteBatch{
+			state:     e.StateEngine().NewWriteBatch(),
+			raft:      e.LogEngine().NewWriteBatch(),
+			separated: true,
+		}
+	}
+	// With a single engine, create one batch, and reference it by both pointers.
+	b := e.Engine().NewWriteBatch()
+	if !spanset.EnableAssertions {
 		return WriteBatch{state: b, raft: b}
 	}
+	// Additionally, if assertions are enabled, enclose the batch into the
+	// corresponding per-engine wrappers. With EnableAssertions, State/LogEngine
+	// are always wrapped, so we don't use conditional type assertions.
+	type wrapper interface {
+		WrapWriteBatch(wb storage.WriteBatch) storage.WriteBatch
+	}
 	return WriteBatch{
-		state:     e.StateEngine().NewWriteBatch(),
-		raft:      e.LogEngine().NewWriteBatch(),
-		separated: true,
+		state: e.StateEngine().(wrapper).WrapWriteBatch(b),
+		raft:  e.LogEngine().(wrapper).WrapWriteBatch(b),
 	}
 }
 
