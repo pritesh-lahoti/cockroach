@@ -259,7 +259,7 @@ jobs:
             fi
 
             # Extract session ID for potential retry
-            NEW_SESSION_ID=$(jq -r '.[] | select(.type == "system") | .session_id // empty' "$EXECUTION_FILE" 2>/dev/null | head -1 || true)
+            NEW_SESSION_ID=$(jq -r 'select(.type == "result") | .session_id // empty' "$EXECUTION_FILE" 2>/dev/null | head -1 || true)
             if [ -n "$NEW_SESSION_ID" ]; then
               SESSION_ID="$NEW_SESSION_ID"
               echo "Session ID: $SESSION_ID"
@@ -267,7 +267,7 @@ jobs:
 
             # Check if implementation succeeded by looking for SUCCESS marker in result
             # Allow flexible formatting: IMPLEMENTATION_RESULT - SUCCESS, IMPLEMENTATION_RESULT: SUCCESS, etc.
-            RESULT=$(jq -r '.[] | select(.type == "result") | .result // empty' "$EXECUTION_FILE" 2>/dev/null || true)
+            RESULT=$(jq -r 'select(.type == "result") | .result // empty' "$EXECUTION_FILE" 2>/dev/null || true)
             if echo "$RESULT" | grep -qiE 'IMPLEMENTATION_RESULT[[:space:]]*[-:][[:space:]]*SUCCESS'; then
               echo "Implementation succeeded on attempt $ATTEMPT"
               EXIT_CODE=0
@@ -306,7 +306,7 @@ jobs:
             exit 1
           fi
 
-          RESULT=$(jq -r '.[] | select(.type == "result") | .result' "$EXECUTION_FILE") || {
+          RESULT=$(jq -r 'select(.type == "result") | .result' "$EXECUTION_FILE") || {
             echo "::error::Failed to parse execution file with jq"
             exit 1
           }
