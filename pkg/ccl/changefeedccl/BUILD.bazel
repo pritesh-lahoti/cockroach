@@ -67,6 +67,7 @@ go_library(
         "//pkg/ccl/changefeedccl/tableset",
         "//pkg/ccl/changefeedccl/timers",
         "//pkg/ccl/utilccl",
+        "//pkg/changefeed/changefeedpb",
         "//pkg/cloud",
         "//pkg/cloud/externalconn",
         "//pkg/cloud/externalconn/connectionpb",

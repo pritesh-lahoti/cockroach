@@ -22,6 +22,7 @@ import (
 	"github.com/cockroachdb/cockroach/pkg/ccl/changefeedccl/kvfeed"
 	"github.com/cockroachdb/cockroach/pkg/ccl/changefeedccl/resolvedspan"
 	"github.com/cockroachdb/cockroach/pkg/ccl/changefeedccl/schemafeed"
+	"github.com/cockroachdb/cockroach/pkg/changefeed/changefeedpb"
 	"github.com/cockroachdb/cockroach/pkg/jobs"
 	"github.com/cockroachdb/cockroach/pkg/jobs/jobfrontier"
 	"github.com/cockroachdb/cockroach/pkg/jobs/jobspb"
@@ -984,16 +985,14 @@ func (ca *changeAggregator) flushFrontier(ctx context.Context) error {
 	}
 
 	// Iterate frontier spans and build a list of spans to emit.
-	batch := jobspb.ResolvedSpans{
-		ResolvedSpans: slices.Collect(ca.frontier.All()),
-	}
+	batch := slices.Collect(ca.frontier.All())
 	return ca.emitResolved(batch)
 }
 
-func (ca *changeAggregator) emitResolved(batch jobspb.ResolvedSpans) error {
-	progressUpdate := jobspb.ResolvedSpans{
-		ResolvedSpans: batch.ResolvedSpans,
-		Stats: jobspb.ResolvedSpans_Stats{
+func (ca *changeAggregator) emitResolved(batch []jobspb.ResolvedSpan) error {
+	progressUpdate := changefeedpb.ChangefeedCheckpoint{
+		ResolvedSpans: batch,
+		Stats: changefeedpb.ChangefeedCheckpoint_Stats{
 			RecentKvCount: ca.recentKVCount,
 		},
 	}
@@ -1740,23 +1739,23 @@ func (cf *changeFrontier) noteAggregatorProgress(ctx context.Context, d rowenc.E
 		return errors.AssertionFailedf(`unexpected datum type %T: %s`, d.Datum, d.Datum)
 	}
 
-	var resolvedSpans jobspb.ResolvedSpans
-	if err := protoutil.Unmarshal([]byte(*raw), &resolvedSpans); err != nil {
+	var changefeedCheckpoint changefeedpb.ChangefeedCheckpoint
+	if err := protoutil.Unmarshal([]byte(*raw), &changefeedCheckpoint); err != nil {
 		return errors.NewAssertionErrorWithWrappedErrf(err,
 			`unmarshalling aggregator progress update: %x`, raw)
 	}
 	if log.V(2) {
-		log.Changefeed.Infof(ctx, "progress update from aggregator: %#v", resolvedSpans)
+		log.Changefeed.Infof(ctx, "progress update from aggregator: %#v", changefeedCheckpoint)
 	}
 
-	cf.maybeMarkJobIdle(resolvedSpans.Stats.RecentKvCount)
+	cf.maybeMarkJobIdle(changefeedCheckpoint.Stats.RecentKvCount)
 
-	frontierChanged, err := cf.forwardFrontier(ctx, resolvedSpans.ResolvedSpans)
+	frontierChanged, err := cf.forwardFrontier(ctx, changefeedCheckpoint.ResolvedSpans)
 	if err != nil {
 		return err
 	}
 
-	if err := cf.maybeCheckpoint(ctx, frontierChanged, resolvedSpans.ResolvedSpans); err != nil {
+	if err := cf.maybeCheckpoint(ctx, frontierChanged, changefeedCheckpoint.ResolvedSpans); err != nil {
 		return err
 	}
 
