@@ -120,6 +120,7 @@ go_library(
         "//pkg/keyvisualizer/spanstatskvaccessor",
         "//pkg/kv",
         "//pkg/kv/bulk",
+        "//pkg/kv/followerreads",
         "//pkg/kv/kvclient",
         "//pkg/kv/kvclient/kvcoord",
         "//pkg/kv/kvclient/kvstreamer",
