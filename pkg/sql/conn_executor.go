@@ -1055,6 +1055,31 @@ type ConnectionHandler struct {
 	ex *connExecutor
 }
 
+// SetOnTCPKeepAliveChange registers a callback that is invoked when any
+// TCP keepalive session variable changes. This allows the pgwire layer
+// to apply updated TCP socket options to the underlying connection.
+func (h ConnectionHandler) SetOnTCPKeepAliveChange(
+	fn func(idle, interval time.Duration, count int, userTimeout time.Duration),
+) {
+	h.ex.dataMutatorIterator.OnTCPKeepAliveSettingChange = fn
+}
+
+// GetTCPKeepAliveSessionData returns the current TCP keepalive session
+// variable values, converted to time.Duration. These may have been set
+// during SetupConn from connection string options or ALTER ROLE SET
+// defaults.
+func (h ConnectionHandler) GetTCPKeepAliveSessionData() (
+	idle, interval time.Duration,
+	count int,
+	userTimeout time.Duration,
+) {
+	sd := h.ex.sessionData()
+	return time.Duration(sd.TcpKeepalivesIdle) * time.Second,
+		time.Duration(sd.TcpKeepalivesInterval) * time.Second,
+		int(sd.TcpKeepalivesCount),
+		time.Duration(sd.TcpUserTimeout) * time.Millisecond
+}
+
 // GetParamStatus retrieves the configured value of the session
 // variable identified by varName. This is used for the initial
 // message sent to a client during a session set-up.
