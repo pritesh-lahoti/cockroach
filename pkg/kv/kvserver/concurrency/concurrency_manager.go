@@ -169,6 +169,11 @@ var VirtualIntentResolution = settings.RegisterBoolSetting(
 	"kv.concurrency.virtual_intent_resolution.enabled",
 	"whether read-only, non-locking requests should virtually resolve intents",
 	false,
+	// TODO(ssd): Re-enable after
+	// https://github.com/cockroachdb/cockroach/issues/164175 is diagnosed and
+	// solved.
+	// metamorphic.ConstantWithTestBool("kv.concurrency.virtual_intent_resolution.enabled",
+	// false),
 	settings.WithValidateBool(func(_ *settings.Values, b bool) error {
 		if b && !buildutil.CrdbTestBuild {
 			return errors.New("kv.concurrency.virtual_intent_resolution.enabled is not supported in production builds")

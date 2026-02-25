@@ -1854,10 +1854,10 @@ def go_deps():
         patches = [
             "@com_github_cockroachdb_cockroach//build/patches:com_github_cockroachdb_pebble.patch",
         ],
-        sha256 = "4c0db5fc57819e24ef590fd052063c18b86e097e0e204da40a5073adb908a3ef",
-        strip_prefix = "github.com/cockroachdb/pebble@v0.0.0-20260210170118-269ff7d9c82e",
+        sha256 = "54673271eed0c13220296d4bbabadd5ec56fa7a34a33a2e62ff724d4b7b27798",
+        strip_prefix = "github.com/cockroachdb/pebble@v0.0.0-20260220030949-4f8b342eaf48",
         urls = [
-            "https://storage.googleapis.com/cockroach-godeps/gomod/github.com/cockroachdb/pebble/com_github_cockroachdb_pebble-v0.0.0-20260210170118-269ff7d9c82e.zip",
+            "https://storage.googleapis.com/cockroach-godeps/gomod/github.com/cockroachdb/pebble/com_github_cockroachdb_pebble-v0.0.0-20260220030949-4f8b342eaf48.zip",
         ],
     )
     go_repository(
@@ -2578,6 +2578,16 @@ def go_deps():
         strip_prefix = "github.com/dgryski/go-sip13@v0.0.0-20200911182023-62edffca9245",
         urls = [
             "https://storage.googleapis.com/cockroach-godeps/gomod/github.com/dgryski/go-sip13/com_github_dgryski_go_sip13-v0.0.0-20200911182023-62edffca9245.zip",
+        ],
+    )
+    go_repository(
+        name = "com_github_di_wu_parser",
+        build_file_proto_mode = "disable_global",
+        importpath = "github.com/di-wu/parser",
+        sha256 = "dd92c5b611ae80dbbb32982e10611169a62f78c58fc953ca0f04d118faf7a60c",
+        strip_prefix = "github.com/di-wu/parser@v0.2.2",
+        urls = [
+            "https://storage.googleapis.com/cockroach-godeps/gomod/github.com/di-wu/parser/com_github_di_wu_parser-v0.2.2.zip",
         ],
     )
     go_repository(
@@ -7921,6 +7931,16 @@ def go_deps():
         strip_prefix = "github.com/schollz/closestmatch@v2.1.0+incompatible",
         urls = [
             "https://storage.googleapis.com/cockroach-godeps/gomod/github.com/schollz/closestmatch/com_github_schollz_closestmatch-v2.1.0+incompatible.zip",
+        ],
+    )
+    go_repository(
+        name = "com_github_scim2_filter_parser_v2",
+        build_file_proto_mode = "disable_global",
+        importpath = "github.com/scim2/filter-parser/v2",
+        sha256 = "ec719dc423397cf534d53605a94f7f81790e4aaa44a2df8120046e5850775c31",
+        strip_prefix = "github.com/scim2/filter-parser/v2@v2.2.0",
+        urls = [
+            "https://storage.googleapis.com/cockroach-godeps/gomod/github.com/scim2/filter-parser/v2/com_github_scim2_filter_parser_v2-v2.2.0.zip",
         ],
     )
     go_repository(
