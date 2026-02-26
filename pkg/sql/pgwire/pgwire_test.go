@@ -2096,7 +2096,13 @@ func TestTCPKeepAliveConnectionInit(t *testing.T) {
 		)
 		defer cleanup()
 		q := pgURL.Query()
-		q.Set("options", "-c tcp_keepalives_idle=25 -c tcp_keepalives_interval=8 -c tcp_keepalives_count=4 -c tcp_user_timeout=15000")
+		// Append to existing options to preserve any cluster routing set by PGUrl.
+		opts := q.Get("options")
+		if opts != "" {
+			opts += " "
+		}
+		opts += "-c tcp_keepalives_idle=25 -c tcp_keepalives_interval=8 -c tcp_keepalives_count=4 -c tcp_user_timeout=15000"
+		q.Set("options", opts)
 		pgURL.RawQuery = q.Encode()
 
 		conn, err := pgx.Connect(ctx, pgURL.String())
@@ -2147,7 +2153,13 @@ func TestTCPKeepAliveConnectionInit(t *testing.T) {
 		)
 		defer cleanup()
 		q := pgURL.Query()
-		q.Set("options", "-c tcp_keepalives_idle=30")
+		// Append to existing options to preserve any cluster routing set by PGUrl.
+		opts := q.Get("options")
+		if opts != "" {
+			opts += " "
+		}
+		opts += "-c tcp_keepalives_idle=30"
+		q.Set("options", opts)
 		pgURL.RawQuery = q.Encode()
 
 		conn, err := pgx.Connect(ctx, pgURL.String())
